@@ -72,20 +72,53 @@ animation:pulse 2s ease-in-out infinite;z-index:10;
 /* MAIN FIRST IMAGE */
 #mainFirstWrap{position:relative;overflow:hidden;}
 
-/* LINKS - ORANGE ACCENT */
+/* LINKS - GLOW PULSE + SCANLINE */
 .links{text-align:center;padding:25px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;z-index:1;}
-.links a{color:var(--accent);opacity:0.7;text-decoration:none;font-size:11px;letter-spacing:0.5px;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
-.links a:hover{opacity:1;text-shadow:0 0 10px rgba(255,106,26,0.3);}
+.links a{
+color:var(--accent);opacity:0.7;text-decoration:none;font-size:11px;
+letter-spacing:0.5px;transition:all .3s;
+display:inline-flex;align-items:center;gap:6px;
+position:relative;overflow:hidden;
+animation:glowPulse 3s ease-in-out infinite;
+}
+.links a:hover{opacity:1;text-shadow:0 0 12px rgba(255,106,26,0.5);animation:none;}
+.links a::after{
+content:'';position:absolute;top:0;left:-100%;
+width:60%;height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,106,26,0.15),transparent);
+animation:scanline 4s linear infinite;
+}
 .arr{font-size:9px;transition:all .3s;}
 .links a:hover .arr{transform:translateX(3px);}
+
+@keyframes glowPulse{
+0%,100%{text-shadow:0 0 0 transparent;opacity:0.6;}
+50%{text-shadow:0 0 8px rgba(255,106,26,0.25);opacity:0.85;}
+}
+@keyframes scanline{
+0%{left:-100%;}
+100%{left:200%;}
+}
 
 .yt-wrap{width:100%;max-width:900px;margin:10px auto;padding:0 20px;position:relative;z-index:1;}
 .yt-container{position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;margin-bottom:10px;}
 .yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
 
 .channel{text-align:center;padding:15px 20px 5px;position:relative;z-index:1;}
-.channel a{color:var(--accent);opacity:0.6;text-decoration:none;font-size:11px;letter-spacing:1px;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
-.channel a:hover{opacity:1;text-shadow:0 0 10px rgba(255,106,26,0.3);}
+.channel a{
+color:var(--accent);opacity:0.6;text-decoration:none;font-size:11px;
+letter-spacing:1px;transition:all .3s;
+display:inline-flex;align-items:center;gap:6px;
+position:relative;overflow:hidden;
+animation:glowPulse 3s ease-in-out infinite;
+}
+.channel a:hover{opacity:1;text-shadow:0 0 12px rgba(255,106,26,0.5);animation:none;}
+.channel a::after{
+content:'';position:absolute;top:0;left:-100%;
+width:60%;height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,106,26,0.15),transparent);
+animation:scanline 4s linear infinite;
+}
 
 /* FOOTER */
 .footer-system{border:1px solid rgba(255,106,26,0.1);display:inline-block;padding:25px 45px;margin-bottom:40px;position:relative;}
@@ -143,6 +176,22 @@ width:12px;
 opacity:0.6;
 }
 
+/* DIAMOND MARKER - links in navigator */
+.sd-diamond{
+width:5px;height:5px;
+background:var(--accent);
+transform:rotate(45deg);
+opacity:0.2;
+transition:all .3s;
+margin:2px 0;
+align-self:flex-end;
+margin-right:4px;
+}
+.sd-diamond.active{
+opacity:0.8;
+box-shadow:0 0 6px rgba(255,106,26,0.4);
+}
+
 /* FADE */
 .fade-section{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease;}
 .fade-section.visible{opacity:1;transform:translateY(0);}
@@ -192,53 +241,53 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="img-wrap fade-section" data-nav data-label="DIRECTOR"><img src="images/4director%20cate.jpg" alt="Director"></div>
 <div class="img-wrap fade-section" data-nav data-label="마이옥션"><img src="images/5ma%20main.jpg" alt="마이옥션 Main"></div>
 <div class="img-wrap fade-section"><img src="images/6ma%20youtube.jpg" alt="마이옥션 YouTube" data-sub></div>
-<div class="channel fade-section"><a href="https://www.youtube.com/@myauction_official" target="_blank">마이옥션TV 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/POEzKz_Dp6Y" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/n7oe8HwXLpA" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/NZ0agkvbSeo" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="channel fade-section" data-link><a href="https://www.youtube.com/@myauction_official" target="_blank">마이옥션TV 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/POEzKz_Dp6Y" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/n7oe8HwXLpA" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/NZ0agkvbSeo" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="img-wrap fade-section"><img src="images/7ma%20uiux.jpg" alt="마이옥션 UIUX" data-sub></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/0VIqWcYyHcI" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="http://my-auction.co.kr/" target="_blank">홈페이지 바로가기 : my-auction.co.kr <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/0VIqWcYyHcI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="http://my-auction.co.kr/" target="_blank">홈페이지 바로가기 : my-auction.co.kr <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section"><img src="images/8ma%20branding.jpg" alt="마이옥션 Branding" data-sub></div>
 <div class="img-wrap fade-section" data-nav data-label="체대친구들"><img src="images/9cdf.jpg" alt="체대친구들"></div>
 <div class="img-wrap fade-section"><img src="images/10cdf%20youtube.jpg" alt="체대친구들 YouTube" data-sub></div>
-<div class="channel fade-section"><a href="https://www.youtube.com/@cdf_jason" target="_blank">체대친구들 (현 CDF이재선) 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/OTkMlAkWIpI" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QVttLq5q3dWb0lYI29LZvYX" target="_blank">▶ 체터뷰 · Playlist (70 videos) <span class="arr">[→]</span></a></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/tvw-8xtJ1ME" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QU9sKyzLaSxkVyd6_m4Lwna" target="_blank">▶ 체대파일러 · All Contents (5 Videos) <span class="arr">[→]</span></a></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/QWNB-H4euhA" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QX5-oW51xByVBf9gVSh9yLZ" target="_blank">▶ 공무원체력 강의 · All Contents <span class="arr">[→]</span></a></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/-N8OhkDXvQM" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QVmtX7Re1gpjN2aQkGV7znv" target="_blank">▶ 꿀팁정보통 · All Contents (13 Videos) <span class="arr">[→]</span></a></div>
+<div class="channel fade-section" data-link><a href="https://www.youtube.com/@cdf_jason" target="_blank">체대친구들 (현 CDF이재선) 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/OTkMlAkWIpI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QVttLq5q3dWb0lYI29LZvYX" target="_blank">▶ 체터뷰 · Playlist (70 videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/tvw-8xtJ1ME" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QU9sKyzLaSxkVyd6_m4Lwna" target="_blank">▶ 체대파일러 · All Contents (5 Videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/QWNB-H4euhA" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://youtube.com/playlist?list=PLxytJQTYF-QX5-oW51xByVBf9gVSh9yLZ" target="_blank">▶ 공무원체력 강의 · All Contents <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/-N8OhkDXvQM" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://youtube.com/playlist?list=PLxytJQTYF-QVmtX7Re1gpjN2aQkGV7znv" target="_blank">▶ 꿀팁정보통 · All Contents (13 Videos) <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section"><img src="images/11cdf%20center.jpg" alt="체대친구들 Center" data-sub></div>
-<div class="links fade-section"><a href="https://www.youtube.com/watch?v=SYU61ezqz4c" target="_blank">▶ 소방공무원특강 · View Contents <span class="arr">[→]</span></a></div>
+<div class="links fade-section" data-link><a href="https://www.youtube.com/watch?v=SYU61ezqz4c" target="_blank">▶ 소방공무원특강 · View Contents <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section" data-nav data-label="배턴터치"><img src="images/12baton.jpg" alt="배턴터치"></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Afy54zR10uY" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/jnF_LRvk72M" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Gvo69s7GebU" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/WUALzMa3ZZ8" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/Afy54zR10uY" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/jnF_LRvk72M" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/Gvo69s7GebU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/WUALzMa3ZZ8" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="img-wrap fade-section" data-nav data-label="에이런컴퍼니"><img src="images/13arun.jpg" alt="에이런컴퍼니"></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/dc6tSan5jQQ" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/2XhH3uvKuUU" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/02EBC3NK_l8" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QXssEpcK6V-ncxsGfNmdlJy" target="_blank">▶ 에이런컴퍼니 · All contents (30 videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/dc6tSan5jQQ" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/2XhH3uvKuUU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/02EBC3NK_l8" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://youtube.com/playlist?list=PLxytJQTYF-QXssEpcK6V-ncxsGfNmdlJy" target="_blank">▶ 에이런컴퍼니 · All contents (30 videos) <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section" data-nav data-label="DESIGNER"><img src="images/14designer%20cate.jpg" alt="Designer"></div>
 <div class="img-wrap fade-section" data-nav data-label="크몽"><img src="images/15kmong.jpg" alt="크몽"></div>
-<div class="links fade-section"><a href="https://kmong.com/@SKIPPWORKS/portfolios" target="_blank">▶ 크몽 · All Artworks (50+) <span class="arr">[→]</span></a></div>
+<div class="links fade-section" data-link><a href="https://kmong.com/@SKIPPWORKS/portfolios" target="_blank">▶ 크몽 · All Artworks (50+) <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section" data-nav data-label="블랙비스트"><img src="images/16vv.jpg" alt="블랙비스트"></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/SzODEKvOdvI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/SzODEKvOdvI" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="img-wrap fade-section"><img src="images/17vv%20detail.jpg" alt="블랙비스트 Detail" data-sub></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/DivNq5wFcRU" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/X4oN7xJiyIs" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Y5H3Emz8vqg" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QU8iakEjnYusd7G4uFPUocX" target="_blank">▶ 블랙비스트 · All Contents (14 videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/DivNq5wFcRU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/X4oN7xJiyIs" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/Y5H3Emz8vqg" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link><a href="https://youtube.com/playlist?list=PLxytJQTYF-QU8iakEjnYusd7G4uFPUocX" target="_blank">▶ 블랙비스트 · All Contents (14 videos) <span class="arr">[→]</span></a></div>
 <div class="img-wrap fade-section" data-nav data-label="윌리워스튜디오"><img src="images/18ww.jpg" alt="윌리워스튜디오"></div>
 <div class="img-wrap fade-section"><img src="images/19ww%20detail.jpg" alt="윌리워스튜디오 Detail" data-sub></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5L5DEMer4Q" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Dj-i6g6YhP4" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/d8LpIM-pRwo" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="links fade-section">
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5L5DEMer4Q" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/Dj-i6g6YhP4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/d8LpIM-pRwo" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section" data-link>
 <a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QVoTTd4ViAW6tm-bMDT-PoL" target="_blank">▶ 윌리워스튜디오 · All Contents (8 videos) <span class="arr">[→]</span></a>
 <a href="https://www.musinsa.com/content/mz/88762" target="_blank">▶ 윌리워스튜디오 · 무신사 룩북 #1 <span class="arr">[→]</span></a>
 <a href="https://www.musinsa.com/content/mz/92648" target="_blank">▶ 윌리워스튜디오 · 무신사 룩북 #2 <span class="arr">[→]</span></a>
@@ -246,11 +295,11 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="img-wrap fade-section" data-nav data-label="PERFORMER"><img src="images/20performer%20cate.jpg" alt="Performer"></div>
 <div class="img-wrap fade-section" data-nav data-label="클라이맥스/맨오브펑키즈"><img src="images/21clmx%20mofz.jpg" alt="클라이맥스 맨오브펑키즈"></div>
 <div class="img-wrap fade-section" data-nav data-label="RECORDS"><img src="images/22records.jpg" alt="Records"></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/eXhtiYfcMB4" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/I173BYAVxNw" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/biVNG4Vn2B4" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/FVBr0hd0d_E" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5hJqde6h5Y" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/eXhtiYfcMB4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/I173BYAVxNw" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/biVNG4Vn2B4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/FVBr0hd0d_E" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section" data-vid><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5hJqde6h5Y" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="img-wrap fade-section" data-nav data-label="END" id="endWrap"><img src="images/23end.jpg" alt="End" id="endImg"></div>
 
 <!-- spacer so user can scroll past end -->
@@ -442,28 +491,31 @@ var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isInte
 document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
 }
 
-/* SCROLL NAV with sub-indicators */
+/* SCROLL NAV with sub-indicators, video ticks, diamond link markers */
 var nav=document.getElementById('scrollNav');
 var secs=document.querySelectorAll('[data-nav]');
 var subEls=document.querySelectorAll('[data-sub]');
+var vidEls=document.querySelectorAll('[data-vid]');
+var linkEls=document.querySelectorAll('[data-link]');
 
-/* Build nav: for each main section, add main bar + any sub ticks that come before next main section */
-function getSubsBetween(mainEl,nextMainEl){
+/* Collect all trackable elements between two main sections */
+function getItemsBetween(mainEl,nextMainEl){
+var allTrackable=document.querySelectorAll('[data-sub],[data-vid],[data-link]');
 var result=[];
-for(var i=0;i<subEls.length;i++){
-var s=subEls[i];
-/* Check if this sub is after mainEl and before nextMainEl in DOM order */
-if(mainEl.compareDocumentPosition(s)&4){ /* s is after mainEl */
-if(!nextMainEl||nextMainEl.compareDocumentPosition(s)&2){ /* s is before nextMainEl */
-result.push(s);
+for(var i=0;i<allTrackable.length;i++){
+var el=allTrackable[i];
+if(mainEl.compareDocumentPosition(el)&4){
+if(!nextMainEl||nextMainEl.compareDocumentPosition(el)&2){
+result.push(el);
 }
 }
 }
 return result;
 }
 
+var allNavItems=[];
+
 for(var i=0;i<secs.length;i++){
-/* Main bar */
 var w=document.createElement('div');w.className='sd-wrap';
 var b=document.createElement('div');b.className='sd-bar';
 var l=document.createElement('div');l.className='sd-label';l.textContent=secs[i].getAttribute('data-label')||'';
@@ -471,14 +523,21 @@ w.appendChild(l);w.appendChild(b);
 (function(idx){w.addEventListener('click',function(){secs[idx].scrollIntoView({behavior:'smooth',block:'start'});});})(i);
 nav.appendChild(w);
 
-/* Sub ticks between this and next main section */
 var nextMain=i<secs.length-1?secs[i+1]:null;
-var subs=getSubsBetween(secs[i],nextMain);
-for(var j=0;j<subs.length;j++){
-var st=document.createElement('div');
-st.className='sd-sub';
-st.setAttribute('data-sub-idx',Array.prototype.indexOf.call(subEls,subs[j]));
-nav.appendChild(st);
+var items=getItemsBetween(secs[i],nextMain);
+for(var j=0;j<items.length;j++){
+var item=items[j];
+var marker;
+if(item.hasAttribute('data-link')){
+marker=document.createElement('div');
+marker.className='sd-diamond';
+}else{
+marker=document.createElement('div');
+marker.className='sd-sub';
+}
+marker._trackEl=item;
+allNavItems.push(marker);
+nav.appendChild(marker);
 }
 }
 
@@ -487,15 +546,12 @@ var bars=nav.querySelectorAll('.sd-bar'),ai=0;
 for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<window.innerHeight*0.5)ai=i;}
 for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
 
-/* Update sub ticks */
-var subTicks=nav.querySelectorAll('.sd-sub');
-for(var i=0;i<subTicks.length;i++){
-var idx=parseInt(subTicks[i].getAttribute('data-sub-idx'));
-var el=subEls[idx];
+for(var i=0;i<allNavItems.length;i++){
+var el=allNavItems[i]._trackEl;
 if(el){
 var r=el.getBoundingClientRect();
 var isActive=r.top<window.innerHeight*0.6&&r.bottom>0;
-subTicks[i].classList.toggle('active',isActive);
+allNavItems[i].classList.toggle('active',isActive);
 }
 }
 }
