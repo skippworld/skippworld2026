@@ -64,6 +64,25 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .img-wrap{width:100%;padding:5px 0;position:relative;z-index:1;}
 .img-wrap img{width:100%;height:auto;display:block;}
 
+/* MAIN FIRST IMAGE - dissolve in + zoom */
+#mainFirstWrap{position:relative;overflow:hidden;}
+#mainFirstWrap img{
+transform:scale(1.15);
+transition:transform 4s cubic-bezier(0.25,0.1,0.25,1);
+}
+#mainFirstWrap.revealed img{
+transform:scale(1);
+}
+#dissolveOverlay{
+position:absolute;inset:0;z-index:2;pointer-events:none;
+background:radial-gradient(circle at center,rgba(0,0,0,0.6) 0%,rgba(0,0,0,1) 60%);
+opacity:1;
+transition:opacity 2s ease;
+}
+#dissolveOverlay.fade-out{
+opacity:0;
+}
+
 /* LINKS - ORANGE ACCENT */
 .links{text-align:center;padding:25px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;z-index:1;}
 .links a{color:var(--accent);opacity:0.7;text-decoration:none;font-size:11px;letter-spacing:0.5px;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
@@ -129,7 +148,7 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="vig-bot" id="vigBot"></div>
 <nav id="scrollNav"></nav>
 
-<div class="img-wrap" data-nav data-label="MAIN"><img src="images/1main.jpg" alt="SKIPPWORLD Main"></div>
+<div class="img-wrap" id="mainFirstWrap" data-nav data-label="MAIN"><div id="dissolveOverlay"></div><img src="images/1main.jpg" alt="SKIPPWORLD Main"></div>
 <div class="img-wrap fade-section" data-nav data-label="PROFILE"><img src="images/2profile.jpg" alt="Profile"></div>
 <div class="img-wrap fade-section" data-nav data-label="INDEX"><img src="images/3index.jpg" alt="Index"></div>
 <div class="img-wrap fade-section" data-nav data-label="DIRECTOR"><img src="images/4director%20cate.jpg" alt="Director"></div>
@@ -352,8 +371,33 @@ document.body.style.overflowX='hidden';
 document.body.style.overflowY='auto';
 document.getElementById('vigTop').style.opacity='1';document.getElementById('vigBot').style.opacity='1';
 document.getElementById('scrollNav').style.opacity='1';window.scrollTo(0,0);
+
+/* Dissolve in from center - 2 seconds */
+var dov=document.getElementById('dissolveOverlay');
+var mfw=document.getElementById('mainFirstWrap');
+setTimeout(function(){
+dov.classList.add('fade-out');
+mfw.classList.add('revealed');
+},100);
+
 var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
 document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
+
+/* Scroll zoom-in effect for main image */
+function onMainScroll(){
+var mf=document.getElementById('mainFirstWrap');
+if(!mf)return;
+var rect=mf.getBoundingClientRect();
+var viewH=window.innerHeight;
+if(rect.top<viewH&&rect.bottom>0){
+var scrolled=Math.max(0,-rect.top);
+var maxScroll=rect.height;
+var progress=Math.min(scrolled/maxScroll,1);
+var scale=1+progress*0.08;
+mf.querySelector('img').style.transform='scale('+scale+')';
+}
+}
+window.addEventListener('scroll',onMainScroll,{passive:true});
 }
 
 /* SCROLL NAV */
