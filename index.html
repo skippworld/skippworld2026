@@ -75,7 +75,7 @@ transform:scale(1);
 }
 #dissolveOverlay{
 position:absolute;inset:0;z-index:2;pointer-events:none;
-background:radial-gradient(circle at center,rgba(0,0,0,0.6) 0%,rgba(0,0,0,1) 60%);
+background:radial-gradient(circle at center,rgba(0,0,0,0.8) 0%,rgba(0,0,0,1) 40%);
 opacity:1;
 transition:opacity 2s ease;
 }
@@ -104,6 +104,37 @@ footer{text-align:center;padding:200px 30px 60px;position:relative;z-index:1;}
 .footer-system::before{content:'[ SYSTEM_LOGOUT ]';position:absolute;top:-8px;left:15px;background:var(--bg);padding:0 8px;font-size:9px;letter-spacing:2px;color:var(--accent);opacity:0.5;}
 .footer-msg{font-size:12px;color:rgba(240,237,232,0.45);line-height:2.2;letter-spacing:0.5px;}
 .footer-copy{margin-top:40px;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:2px;}
+
+/* END IMAGE - zoom out + darken */
+#endWrap{overflow:hidden;position:relative;}
+#endImg{transition:transform 1.5s ease,filter 1.5s ease;}
+#endWrap.ending #endImg{transform:scale(0.7);filter:brightness(0);}
+#endingSequence{
+position:relative;z-index:1;
+min-height:100vh;
+display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+padding:60px 30px;
+}
+#endingDarken{
+position:absolute;inset:0;
+background:radial-gradient(circle at center,rgba(0,0,0,0.5),rgba(0,0,0,1) 70%);
+opacity:0;transition:opacity 1s ease;
+pointer-events:none;
+}
+#logoutWrap{
+position:relative;z-index:2;
+text-align:center;
+opacity:0;
+filter:blur(15px);
+transform:scale(0.9);
+transition:all 1.5s cubic-bezier(0.25,0.1,0.25,1);
+}
+#logoutWrap.visible{
+opacity:1;
+filter:blur(0);
+transform:scale(1);
+}
 
 /* FADE */
 .fade-section{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease;}
@@ -213,17 +244,21 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/biVNG4Vn2B4" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/FVBr0hd0d_E" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5hJqde6h5Y" allowfullscreen loading="lazy"></iframe></div></div>
-<div class="img-wrap fade-section" data-nav data-label="END"><img src="images/23end.jpg" alt="End"></div>
+<div class="img-wrap fade-section" data-nav data-label="END" id="endWrap"><img src="images/23end.jpg" alt="End" id="endImg"></div>
 
-<footer class="fade-section">
-<div class="footer-system">
+<!-- ENDING SEQUENCE -->
+<div id="endingSequence">
+<div id="endingDarken"></div>
+<div id="logoutWrap">
+<div class="footer-system" id="logoutBox">
 <div class="footer-msg">
 SKIPPWORLD는 계속 확장 중입니다.<br>
 감사합니다.
 </div>
 </div>
 <div class="footer-copy">© 2026 SKIPPWORLD<span style="color:var(--accent)">.</span> All Rights Reserved.</div>
-</footer>
+</div>
+</div>
 </div>
 
 <script>
@@ -416,6 +451,29 @@ for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<window.inn
 for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
 }
 window.addEventListener('scroll',uNav,{passive:true});
+
+/* ═══ ENDING SEQUENCE ═══ */
+var endTriggered=false;
+function checkEnding(){
+var ew=document.getElementById('endWrap');
+if(!ew||endTriggered)return;
+var rect=ew.getBoundingClientRect();
+var viewH=window.innerHeight;
+/* When end image is mostly in view */
+if(rect.top<viewH*0.4){
+endTriggered=true;
+/* 1. End image zooms out + darkens */
+ew.classList.add('ending');
+/* 2. After end image shrinks, show logout */
+setTimeout(function(){
+document.getElementById('endingDarken').style.opacity='1';
+},800);
+setTimeout(function(){
+document.getElementById('logoutWrap').classList.add('visible');
+},1500);
+}
+}
+window.addEventListener('scroll',checkEnding,{passive:true});
 </script>
 </body>
 </html>
