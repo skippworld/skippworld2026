@@ -99,42 +99,45 @@ opacity:0;
 .channel a:hover{opacity:1;text-shadow:0 0 10px rgba(255,106,26,0.3);}
 
 /* FOOTER */
-footer{text-align:center;padding:200px 30px 60px;position:relative;z-index:1;}
 .footer-system{border:1px solid rgba(255,106,26,0.1);display:inline-block;padding:25px 45px;margin-bottom:40px;position:relative;}
 .footer-system::before{content:'[ SYSTEM_LOGOUT ]';position:absolute;top:-8px;left:15px;background:var(--bg);padding:0 8px;font-size:9px;letter-spacing:2px;color:var(--accent);opacity:0.5;}
 .footer-msg{font-size:12px;color:rgba(240,237,232,0.45);line-height:2.2;letter-spacing:0.5px;}
 .footer-copy{margin-top:40px;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:2px;}
 
-/* END IMAGE - zoom out + darken */
-#endWrap{overflow:hidden;position:relative;}
-#endImg{transition:transform 1.5s ease,filter 1.5s ease;}
-#endWrap.ending #endImg{transform:scale(0.7);filter:brightness(0);}
-#endingSequence{
-position:relative;z-index:1;
-min-height:100vh;
+/* ENDING OVERLAY - fixed, covers screen like landing */
+#endOverlay{
+position:fixed;inset:0;z-index:4500;
+background:var(--bg);
 display:flex;flex-direction:column;
 align-items:center;justify-content:center;
-padding:60px 30px;
+pointer-events:none;opacity:0;
+transition:opacity 0.5s;
 }
-#endingDarken{
-position:absolute;inset:0;
-background:radial-gradient(circle at center,rgba(0,0,0,0.5),rgba(0,0,0,1) 70%);
-opacity:0;transition:opacity 1s ease;
-pointer-events:none;
-}
-#logoutWrap{
-position:relative;z-index:2;
+#endOverlay.active{pointer-events:all;opacity:1;}
+#logoutBox{
+max-width:620px;width:90%;
+border:1px solid rgba(255,106,26,0.15);
+background:rgba(0,0,0,0.92);
+padding:35px 40px 25px;
+position:relative;
 text-align:center;
-opacity:0;
-filter:blur(15px);
-transform:scale(0.9);
-transition:all 1.5s cubic-bezier(0.25,0.1,0.25,1);
 }
-#logoutWrap.visible{
-opacity:1;
-filter:blur(0);
-transform:scale(1);
+#logoutBox::before{
+content:'[ SYSTEM_LOGOUT ]';position:absolute;top:-9px;left:20px;
+background:var(--bg);padding:0 10px;font-size:9px;letter-spacing:3px;color:var(--accent);opacity:0.6;
 }
+#logoutContent{line-height:2.2;font-size:12px;color:rgba(240,237,232,0.45);letter-spacing:0.5px;}
+#logoutCopy{margin-top:30px;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:2px;}
+#logoutPrompt{margin-top:20px;font-size:10px;letter-spacing:2px;color:var(--accent);opacity:0.4;animation:pulse 2s ease-in-out infinite;}
+
+/* TOP BUTTON in scroll nav */
+.sd-top{
+width:14px;height:14px;margin-top:8px;
+display:flex;align-items:center;justify-content:center;
+cursor:pointer;opacity:0.3;transition:all .3s;
+}
+.sd-top:hover{opacity:1;}
+.sd-top svg{width:10px;height:10px;}
 
 /* FADE */
 .fade-section{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease;}
@@ -246,19 +249,20 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5hJqde6h5Y" allowfullscreen loading="lazy"></iframe></div></div>
 <div class="img-wrap fade-section" data-nav data-label="END" id="endWrap"><img src="images/23end.jpg" alt="End" id="endImg"></div>
 
-<!-- ENDING SEQUENCE -->
-<div id="endingSequence">
-<div id="endingDarken"></div>
-<div id="logoutWrap">
-<div class="footer-system" id="logoutBox">
-<div class="footer-msg">
+<!-- spacer so user can scroll past end -->
+<div style="height:120vh;position:relative;z-index:1;"></div>
+</div>
+
+<!-- ENDING OVERLAY - like landing but reversed -->
+<div id="endOverlay">
+<div id="logoutBox">
+<div id="logoutContent">
 SKIPPWORLD는 계속 확장 중입니다.<br>
 감사합니다.
 </div>
+<div id="logoutCopy">© 2026 SKIPPWORLD<span style="color:var(--accent)">.</span> All Rights Reserved.</div>
 </div>
-<div class="footer-copy">© 2026 SKIPPWORLD<span style="color:var(--accent)">.</span> All Rights Reserved.</div>
-</div>
-</div>
+<div id="logoutPrompt">[ SCROLL UP : 돌아가기 ]</div>
 </div>
 
 <script>
@@ -373,29 +377,85 @@ setTimeout(function(){landing.style.display='none';startReveal();},300);
 /* REVEAL MAIN */
 function startReveal(){
 var rp=document.getElementById('revealPhase'),ri=document.getElementById('revealImg'),rm=document.getElementById('revealMask');
-rp.style.display='block';ri.style.opacity='1';ri.style.width='25vw';ri.style.borderRadius='6px';
-rm.style.background='radial-gradient(circle at center,transparent 8%,rgba(0,0,0,0.95) 25%)';
-var sc2=0,mx2=3,prog=0;
-function upMask(p){var r=8+p*55;rm.style.background='radial-gradient(circle at center,transparent '+r+'%,rgba(0,0,0,'+(0.95-p*0.4)+') '+(r+12)+'%)';}
+rp.style.display='block';
+ri.style.opacity='0';
+ri.style.width='15vw';
+ri.style.borderRadius='50%';
+
+/* Smooth continuous scroll progress */
+var totalScroll=0;
+var targetScroll=800; /* total scroll distance needed */
+var completed=false;
+
+function updateReveal(progress){
+/* Size: 15vw -> 100vw (smooth) */
+var size=15+progress*85;
+ri.style.width=size+'vw';
+
+/* Opacity: 0 -> 1 (first 40% of scroll) */
+var opacityP=Math.min(progress/0.4,1);
+ri.style.opacity=opacityP;
+
+/* Border radius: circle -> square */
+var radius=50*(1-progress);
+ri.style.borderRadius=radius+'%';
+
+/* Mask: center reveals outward */
+var maskSize=progress*70;
+var maskDark=1-progress*0.6;
+rm.style.background='radial-gradient(circle at center,transparent '+maskSize+'%,rgba(0,0,0,'+maskDark+') '+(maskSize+20)+'%)';
+}
+
+updateReveal(0);
+
 function onW(e){
 e.preventDefault();
-var delta=e.deltaY;
-if(delta>0){sc2++;prog=Math.min(sc2/mx2,1);
-ri.style.width=(25+prog*75)+'vw';ri.style.borderRadius=(6*(1-prog))+'px';upMask(prog);
-if(prog>=1){window.removeEventListener('wheel',onW);
-ri.style.transition='all 0.5s ease';ri.style.width='100vw';ri.style.borderRadius='0';rm.style.transition='opacity 0.4s';rm.style.opacity='0';
-setTimeout(showMain,600);}
-}}
+if(completed)return;
+var delta=Math.abs(e.deltaY);
+totalScroll+=delta;
+var progress=Math.min(totalScroll/targetScroll,1);
+
+/* Ease out curve for smoother feel */
+var eased=1-Math.pow(1-progress,2);
+updateReveal(eased);
+
+if(progress>=1&&!completed){
+completed=true;
+window.removeEventListener('wheel',onW);
+/* Final smooth transition to full */
+ri.style.transition='all 0.6s cubic-bezier(0.25,0.1,0.25,1)';
+ri.style.width='100vw';ri.style.borderRadius='0';ri.style.opacity='1';
+rm.style.transition='opacity 0.5s';rm.style.opacity='0';
+setTimeout(showMain,700);
+}
+}
 window.addEventListener('wheel',onW,{passive:false});
-var ty=0;
-function onTS(e){ty=e.touches[0].clientY;}
-function onTM(e){e.preventDefault();var d=ty-e.touches[0].clientY;if(Math.abs(d)>30){ty=e.touches[0].clientY;sc2++;prog=Math.min(sc2/mx2,1);
-ri.style.width=(25+prog*75)+'vw';ri.style.borderRadius=(6*(1-prog))+'px';upMask(prog);
-if(prog>=1){window.removeEventListener('touchstart',onTS);window.removeEventListener('touchmove',onTM);
-ri.style.transition='all 0.5s ease';ri.style.width='100vw';ri.style.borderRadius='0';rm.style.transition='opacity 0.4s';rm.style.opacity='0';
-setTimeout(showMain,600);}
-}}
-window.addEventListener('touchstart',onTS,{passive:false});window.addEventListener('touchmove',onTM,{passive:false});
+
+/* Touch support - smooth */
+var lastTouchY=0;
+function onTS(e){lastTouchY=e.touches[0].clientY;}
+function onTM(e){
+e.preventDefault();
+if(completed)return;
+var diff=Math.abs(lastTouchY-e.touches[0].clientY);
+lastTouchY=e.touches[0].clientY;
+totalScroll+=diff;
+var progress=Math.min(totalScroll/targetScroll,1);
+var eased=1-Math.pow(1-progress,2);
+updateReveal(eased);
+
+if(progress>=1&&!completed){
+completed=true;
+window.removeEventListener('touchstart',onTS);
+window.removeEventListener('touchmove',onTM);
+ri.style.transition='all 0.6s cubic-bezier(0.25,0.1,0.25,1)';
+ri.style.width='100vw';ri.style.borderRadius='0';ri.style.opacity='1';
+rm.style.transition='opacity 0.5s';rm.style.opacity='0';
+setTimeout(showMain,700);
+}
+}
+window.addEventListener('touchstart',onTS,{passive:false});
+window.addEventListener('touchmove',onTM,{passive:false});
 }
 
 function showMain(){
@@ -417,22 +477,6 @@ mfw.classList.add('revealed');
 
 var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
 document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
-
-/* Scroll zoom-in effect for main image */
-function onMainScroll(){
-var mf=document.getElementById('mainFirstWrap');
-if(!mf)return;
-var rect=mf.getBoundingClientRect();
-var viewH=window.innerHeight;
-if(rect.top<viewH&&rect.bottom>0){
-var scrolled=Math.max(0,-rect.top);
-var maxScroll=rect.height;
-var progress=Math.min(scrolled/maxScroll,1);
-var scale=1+progress*0.08;
-mf.querySelector('img').style.transform='scale('+scale+')';
-}
-}
-window.addEventListener('scroll',onMainScroll,{passive:true});
 }
 
 /* SCROLL NAV */
@@ -452,28 +496,74 @@ for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
 }
 window.addEventListener('scroll',uNav,{passive:true});
 
+/* TOP BUTTON */
+var topWrap=document.createElement('div');topWrap.className='sd-top';
+topWrap.innerHTML='<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 7L5 3L9 7"/></svg>';
+topWrap.style.color='var(--accent)';
+topWrap.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+nav.appendChild(topWrap);
+
 /* ═══ ENDING SEQUENCE ═══ */
-var endTriggered=false;
+var endOverlay=document.getElementById('endOverlay');
+var endActive=false;
+var logoutBox=document.getElementById('logoutBox');
+var logoutPrompt=document.getElementById('logoutPrompt');
+
 function checkEnding(){
 var ew=document.getElementById('endWrap');
-if(!ew||endTriggered)return;
-var rect=ew.getBoundingClientRect();
+if(!ew)return;
+var docH=document.documentElement.scrollHeight;
+var scrollY=window.scrollY||window.pageYOffset;
 var viewH=window.innerHeight;
-/* When end image is mostly in view */
-if(rect.top<viewH*0.4){
-endTriggered=true;
-/* 1. End image zooms out + darkens */
-ew.classList.add('ending');
-/* 2. After end image shrinks, show logout */
+var distFromBottom=docH-scrollY-viewH;
+
+if(distFromBottom<200&&!endActive){
+/* Activate ending */
+endActive=true;
+endOverlay.classList.add('active');
+/* Logout box starts blurred, then deblurs */
+logoutBox.style.filter='blur(18px)';
+logoutBox.style.transform='scale(0.85)';
+logoutBox.style.opacity='0';
+logoutBox.style.transition='all 1.2s cubic-bezier(0.25,0.1,0.25,1)';
+logoutPrompt.style.opacity='0';
+logoutPrompt.style.transition='opacity 1s ease 0.8s';
 setTimeout(function(){
-document.getElementById('endingDarken').style.opacity='1';
+logoutBox.style.filter='blur(0)';
+logoutBox.style.transform='scale(1)';
+logoutBox.style.opacity='1';
+logoutPrompt.style.opacity='0.4';
+},100);
+}
+}
+
+/* Scroll up to dismiss ending */
+function checkEndingDismiss(){
+if(!endActive)return;
+var docH=document.documentElement.scrollHeight;
+var scrollY=window.scrollY||window.pageYOffset;
+var viewH=window.innerHeight;
+var distFromBottom=docH-scrollY-viewH;
+
+if(distFromBottom>300){
+/* Deactivate - reverse: blur out logout, show end page again */
+logoutBox.style.transition='all 0.8s cubic-bezier(0.25,0.1,0.25,1)';
+logoutBox.style.filter='blur(18px)';
+logoutBox.style.transform='scale(1.3)';
+logoutBox.style.opacity='0';
+logoutPrompt.style.transition='opacity 0.3s';
+logoutPrompt.style.opacity='0';
+setTimeout(function(){
+endOverlay.classList.remove('active');
+endActive=false;
 },800);
-setTimeout(function(){
-document.getElementById('logoutWrap').classList.add('visible');
-},1500);
 }
 }
-window.addEventListener('scroll',checkEnding,{passive:true});
+
+window.addEventListener('scroll',function(){
+checkEnding();
+checkEndingDismiss();
+},{passive:true});
 </script>
 </body>
 </html>
