@@ -43,6 +43,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 #revealPhase{position:fixed;inset:0;z-index:4000;background:transparent;display:none;overflow:hidden;}
 #revealImg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0;height:auto;object-fit:cover;opacity:0;border-radius:8px;}
 #revealMask{position:absolute;inset:0;pointer-events:none;}
+#scrollGuide{
+position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+font-size:10px;letter-spacing:3px;color:var(--accent);opacity:0.5;
+animation:pulse 2s ease-in-out infinite;z-index:10;
+}
 
 /* MAIN */
 #mainContent{position:relative;z-index:1;display:none;}
@@ -64,24 +69,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .img-wrap{width:100%;padding:5px 0;position:relative;z-index:1;}
 .img-wrap img{width:100%;height:auto;display:block;}
 
-/* MAIN FIRST IMAGE - dissolve in + zoom */
+/* MAIN FIRST IMAGE */
 #mainFirstWrap{position:relative;overflow:hidden;}
-#mainFirstWrap img{
-transform:scale(1.15);
-transition:transform 4s cubic-bezier(0.25,0.1,0.25,1);
-}
-#mainFirstWrap.revealed img{
-transform:scale(1);
-}
-#dissolveOverlay{
-position:absolute;inset:0;z-index:2;pointer-events:none;
-background:radial-gradient(circle at center,rgba(0,0,0,0.8) 0%,rgba(0,0,0,1) 40%);
-opacity:1;
-transition:opacity 2s ease;
-}
-#dissolveOverlay.fade-out{
-opacity:0;
-}
 
 /* LINKS - ORANGE ACCENT */
 .links{text-align:center;padding:25px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;z-index:1;}
@@ -174,7 +163,7 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 </div>
 
 <!-- REVEAL -->
-<div id="revealPhase"><div id="revealMask"></div><img id="revealImg" src="images/1main.jpg" alt="Main"></div>
+<div id="revealPhase"><div id="revealMask"></div><img id="revealImg" src="images/1main.jpg" alt="Main"><div id="scrollGuide">[ SCROLL DOWN ]</div></div>
 
 <!-- MAIN -->
 <div id="mainContent">
@@ -182,7 +171,7 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div class="vig-bot" id="vigBot"></div>
 <nav id="scrollNav"></nav>
 
-<div class="img-wrap" id="mainFirstWrap" data-nav data-label="MAIN"><div id="dissolveOverlay"></div><img src="images/1main.jpg" alt="SKIPPWORLD Main"></div>
+<div class="img-wrap" id="mainFirstWrap" data-nav data-label="MAIN"><img src="images/1main.jpg" alt="SKIPPWORLD Main"></div>
 <div class="img-wrap fade-section" data-nav data-label="PROFILE"><img src="images/2profile.jpg" alt="Profile"></div>
 <div class="img-wrap fade-section" data-nav data-label="INDEX"><img src="images/3index.jpg" alt="Index"></div>
 <div class="img-wrap fade-section" data-nav data-label="DIRECTOR"><img src="images/4director%20cate.jpg" alt="Director"></div>
@@ -374,107 +363,68 @@ setTimeout(function(){landing.style.display='none';startReveal();},300);
 },700);
 }
 
-/* REVEAL MAIN */
+/* REVEAL MAIN - bidirectional scroll, seamless transition */
 function startReveal(){
 var rp=document.getElementById('revealPhase'),ri=document.getElementById('revealImg'),rm=document.getElementById('revealMask');
+var sg=document.getElementById('scrollGuide');
 rp.style.display='block';
 ri.style.opacity='0';
 ri.style.width='15vw';
 ri.style.borderRadius='50%';
 
-/* Smooth continuous scroll progress */
 var totalScroll=0;
-var targetScroll=800; /* total scroll distance needed */
+var targetScroll=800;
 var completed=false;
 
-function updateReveal(progress){
-/* Size: 15vw -> 100vw (smooth) */
-var size=15+progress*85;
+function updateReveal(p){
+var size=15+p*85;
 ri.style.width=size+'vw';
-
-/* Opacity: 0 -> 1 (first 40% of scroll) */
-var opacityP=Math.min(progress/0.4,1);
-ri.style.opacity=opacityP;
-
-/* Border radius: circle -> square */
-var radius=50*(1-progress);
-ri.style.borderRadius=radius+'%';
-
-/* Mask: center reveals outward */
-var maskSize=progress*70;
-var maskDark=1-progress*0.6;
-rm.style.background='radial-gradient(circle at center,transparent '+maskSize+'%,rgba(0,0,0,'+maskDark+') '+(maskSize+20)+'%)';
+ri.style.opacity=Math.min(p/0.4,1);
+ri.style.borderRadius=(50*(1-p))+'%';
+var ms=p*70,md=1-p*0.6;
+rm.style.background='radial-gradient(circle at center,transparent '+ms+'%,rgba(0,0,0,'+md+') '+(ms+20)+'%)';
+sg.style.opacity=Math.max(0,0.5-p*2);
 }
-
 updateReveal(0);
 
 function onW(e){
 e.preventDefault();
 if(completed)return;
-var delta=Math.abs(e.deltaY);
-totalScroll+=delta;
-var progress=Math.min(totalScroll/targetScroll,1);
-
-/* Ease out curve for smoother feel */
-var eased=1-Math.pow(1-progress,2);
-updateReveal(eased);
-
-if(progress>=1&&!completed){
-completed=true;
-window.removeEventListener('wheel',onW);
-/* Final smooth transition to full */
-ri.style.transition='all 0.6s cubic-bezier(0.25,0.1,0.25,1)';
-ri.style.width='100vw';ri.style.borderRadius='0';ri.style.opacity='1';
-rm.style.transition='opacity 0.5s';rm.style.opacity='0';
-setTimeout(showMain,700);
-}
+totalScroll+=e.deltaY;
+if(totalScroll<0)totalScroll=0;
+var p=Math.min(totalScroll/targetScroll,1);
+updateReveal(1-Math.pow(1-p,2));
+if(p>=1&&!completed){completed=true;window.removeEventListener('wheel',onW);showMainSeamless();}
 }
 window.addEventListener('wheel',onW,{passive:false});
 
-/* Touch support - smooth */
-var lastTouchY=0;
-function onTS(e){lastTouchY=e.touches[0].clientY;}
+var lty=0;
+function onTS(e){lty=e.touches[0].clientY;}
 function onTM(e){
-e.preventDefault();
-if(completed)return;
-var diff=Math.abs(lastTouchY-e.touches[0].clientY);
-lastTouchY=e.touches[0].clientY;
-totalScroll+=diff;
-var progress=Math.min(totalScroll/targetScroll,1);
-var eased=1-Math.pow(1-progress,2);
-updateReveal(eased);
-
-if(progress>=1&&!completed){
-completed=true;
-window.removeEventListener('touchstart',onTS);
-window.removeEventListener('touchmove',onTM);
-ri.style.transition='all 0.6s cubic-bezier(0.25,0.1,0.25,1)';
-ri.style.width='100vw';ri.style.borderRadius='0';ri.style.opacity='1';
-rm.style.transition='opacity 0.5s';rm.style.opacity='0';
-setTimeout(showMain,700);
-}
+e.preventDefault();if(completed)return;
+var d=lty-e.touches[0].clientY;lty=e.touches[0].clientY;
+totalScroll+=d;if(totalScroll<0)totalScroll=0;
+var p=Math.min(totalScroll/targetScroll,1);
+updateReveal(1-Math.pow(1-p,2));
+if(p>=1&&!completed){completed=true;window.removeEventListener('touchstart',onTS);window.removeEventListener('touchmove',onTM);showMainSeamless();}
 }
 window.addEventListener('touchstart',onTS,{passive:false});
 window.addEventListener('touchmove',onTM,{passive:false});
 }
 
-function showMain(){
-document.getElementById('revealPhase').style.display='none';
+function showMainSeamless(){
 document.getElementById('mainContent').style.display='block';
 document.body.style.overflow='';
 document.body.style.overflowX='hidden';
 document.body.style.overflowY='auto';
-document.getElementById('vigTop').style.opacity='1';document.getElementById('vigBot').style.opacity='1';
-document.getElementById('scrollNav').style.opacity='1';window.scrollTo(0,0);
-
-/* Dissolve in from center - 2 seconds */
-var dov=document.getElementById('dissolveOverlay');
-var mfw=document.getElementById('mainFirstWrap');
-setTimeout(function(){
-dov.classList.add('fade-out');
-mfw.classList.add('revealed');
-},100);
-
+window.scrollTo(0,0);
+var rp=document.getElementById('revealPhase');
+rp.style.transition='opacity 1.2s ease';
+rp.style.opacity='0';
+document.getElementById('vigTop').style.opacity='1';
+document.getElementById('vigBot').style.opacity='1';
+document.getElementById('scrollNav').style.opacity='1';
+setTimeout(function(){rp.style.display='none';},1300);
 var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
 document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
 }
