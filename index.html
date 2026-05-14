@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKIPPWORLD — 2026 Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=D2+Coding:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#ff6a1a;--bg:#000000;--txt:#f0ede8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:auto;}
+body{background:var(--bg);color:var(--txt);font-family:'D2 Coding',monospace;font-size:12px;overflow:hidden;cursor:none;}
+body.scrollable{overflow-x:hidden;overflow-y:auto;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:200px 200px;}
+
+/* STARS CANVAS */
+#starsCanvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+
+/* CURSOR */
+#cursorWrap{position:fixed;pointer-events:none;z-index:10000;}
+#cursorCore{width:6px;height:6px;border-radius:50%;background:rgba(240,237,232,0.7);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#cursorMoon{width:14px;height:14px;border-radius:50%;position:absolute;background:radial-gradient(circle at 40% 35%,rgba(220,218,210,0.8),rgba(180,178,170,0.4) 50%,rgba(120,118,112,0.2) 80%,transparent);box-shadow:0 0 8px 1px rgba(240,237,232,0.1),inset -2px -1px 4px rgba(0,0,0,0.3),inset 1px 1px 3px rgba(255,255,255,0.15);}
+#cursorRing{width:36px;height:36px;border-radius:50%;border:0.5px solid rgba(240,237,232,0.06);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+
+/* LANDING */
+#landing{position:fixed;inset:0;z-index:5000;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#welcomeWrap{position:relative;z-index:1;text-align:center;}
+.landing-title{font-size:clamp(16px,3.5vw,32px);letter-spacing:8px;color:var(--txt);font-weight:700;min-height:44px;}
+.landing-title .dot{color:var(--accent);}
+.caret{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;animation:blink .7s step-end infinite;vertical-align:text-bottom;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+#clickEnter{margin-top:40px;font-size:10px;letter-spacing:3px;color:rgba(240,237,232,0.3);animation:pulse 2s ease-in-out infinite;display:none;}
+@keyframes pulse{0%,100%{opacity:.3;}50%{opacity:.7;}}
+
+/* DIALOGUE */
+#dialogueWrap{position:relative;z-index:1;max-width:620px;width:90%;border:1px solid rgba(255,106,26,0.15);background:rgba(0,0,0,0.92);padding:35px 40px 25px;display:none;transform-origin:center center;}
+#dialogueWrap::before{content:'[ SYSTEM_ACCESS ]';position:absolute;top:-9px;left:20px;background:var(--bg);padding:0 10px;font-size:9px;letter-spacing:3px;color:var(--accent);opacity:0.6;}
+#dTextBox{text-align:center;line-height:2.4;font-size:13px;color:rgba(240,237,232,0.85);min-height:180px;}
+#dCaret{display:inline-block;width:2px;height:1em;background:var(--accent);animation:blink .6s step-end infinite;vertical-align:text-bottom;margin-left:1px;}
+#dPrompt{margin-top:25px;text-align:center;font-size:10px;letter-spacing:2px;color:var(--accent);opacity:0.5;animation:pulse 2s ease-in-out infinite;}
+
+/* REVEAL */
+#revealPhase{position:fixed;inset:0;z-index:4000;background:transparent;display:none;overflow:hidden;}
+#revealImg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0;height:auto;object-fit:cover;opacity:0;border-radius:8px;}
+#revealMask{position:absolute;inset:0;pointer-events:none;}
+
+/* MAIN */
+#mainContent{position:relative;z-index:1;display:none;}
+.vig-top,.vig-bot{position:fixed;left:0;right:0;height:140px;pointer-events:none;z-index:100;opacity:0;transition:opacity .5s;}
+.vig-top{top:0;background:linear-gradient(to bottom,rgba(0,0,0,0.85),transparent);}
+.vig-bot{bottom:0;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);}
+
+/* SCROLL NAV */
+#scrollNav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;z-index:200;opacity:0;transition:opacity .5s;}
+.sd-wrap{display:flex;align-items:center;justify-content:flex-end;gap:0;position:relative;height:20px;cursor:pointer;}
+.sd-bar{height:2px;border-radius:1px;background:rgba(240,237,232,0.15);transition:all .35s ease;width:14px;flex-shrink:0;}
+.sd-bar.active{background:var(--accent);width:28px;height:3px;box-shadow:0 0 8px rgba(255,106,26,0.3);}
+.sd-wrap:hover .sd-bar{width:28px;background:rgba(240,237,232,0.4);}
+.sd-wrap:hover .sd-bar.active{background:var(--accent);}
+.sd-label{white-space:nowrap;font-size:9px;letter-spacing:1px;color:var(--accent);background:rgba(0,0,0,0.95);border:1px solid rgba(255,106,26,0.15);padding:3px 10px;border-radius:2px;opacity:0;transform:translateX(5px);transition:all .25s ease;pointer-events:none;margin-right:8px;position:absolute;right:100%;}
+.sd-wrap:hover .sd-label{opacity:1;transform:translateX(0);}
+
+/* IMAGES FULL WIDTH */
+.img-wrap{width:100%;padding:5px 0;position:relative;z-index:1;}
+.img-wrap img{width:100%;height:auto;display:block;}
+
+/* LINKS - ORANGE ACCENT */
+.links{text-align:center;padding:25px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;z-index:1;}
+.links a{color:var(--accent);opacity:0.7;text-decoration:none;font-size:11px;letter-spacing:0.5px;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
+.links a:hover{opacity:1;text-shadow:0 0 10px rgba(255,106,26,0.3);}
+.arr{font-size:9px;transition:all .3s;}
+.links a:hover .arr{transform:translateX(3px);}
+
+.yt-wrap{width:100%;max-width:900px;margin:10px auto;padding:0 20px;position:relative;z-index:1;}
+.yt-container{position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;margin-bottom:10px;}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+
+.channel{text-align:center;padding:15px 20px 5px;position:relative;z-index:1;}
+.channel a{color:var(--accent);opacity:0.6;text-decoration:none;font-size:11px;letter-spacing:1px;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
+.channel a:hover{opacity:1;text-shadow:0 0 10px rgba(255,106,26,0.3);}
+
+/* FOOTER */
+footer{text-align:center;padding:200px 30px 60px;position:relative;z-index:1;}
+.footer-system{border:1px solid rgba(255,106,26,0.1);display:inline-block;padding:25px 45px;margin-bottom:40px;position:relative;}
+.footer-system::before{content:'[ SYSTEM_LOGOUT ]';position:absolute;top:-8px;left:15px;background:var(--bg);padding:0 8px;font-size:9px;letter-spacing:2px;color:var(--accent);opacity:0.5;}
+.footer-msg{font-size:12px;color:rgba(240,237,232,0.45);line-height:2.2;letter-spacing:0.5px;}
+.footer-copy{margin-top:40px;font-size:10px;color:rgba(240,237,232,0.2);letter-spacing:2px;}
+
+/* FADE */
+.fade-section{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease;}
+.fade-section.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:768px){
+.landing-title{letter-spacing:3px;}
+#dialogueWrap{padding:30px 20px 20px;}
+#dTextBox{font-size:12px;min-height:160px;}
+.yt-wrap{padding:0;}
+#scrollNav{right:8px;}
+.sd-label{display:none;}
+.sd-bar{width:10px;}.sd-bar.active{width:20px;}
+footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
+.img-wrap{padding:5px 0;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+<div id="cursorWrap"><div id="cursorRing"></div><div id="cursorCore"></div><div id="cursorMoon"></div></div>
+
+<!-- LANDING -->
+<div id="landing">
+<div id="welcomeWrap">
+<div class="landing-title"><span id="titleText"></span><span class="caret"></span></div>
+<div id="clickEnter">[ CLICK TO ENTER ]</div>
+</div>
+<div id="dialogueWrap">
+<div id="dTextBox"><span id="dContent"></span><span id="dCaret"></span></div>
+<div id="dPrompt"></div>
+</div>
+</div>
+
+<!-- REVEAL -->
+<div id="revealPhase"><div id="revealMask"></div><img id="revealImg" src="images/1main.jpg" alt="Main"></div>
+
+<!-- MAIN -->
+<div id="mainContent">
+<div class="vig-top" id="vigTop"></div>
+<div class="vig-bot" id="vigBot"></div>
+<nav id="scrollNav"></nav>
+
+<div class="img-wrap" data-nav data-label="MAIN"><img src="images/1main.jpg" alt="SKIPPWORLD Main"></div>
+<div class="img-wrap fade-section" data-nav data-label="PROFILE"><img src="images/2profile.jpg" alt="Profile"></div>
+<div class="img-wrap fade-section" data-nav data-label="INDEX"><img src="images/3index.jpg" alt="Index"></div>
+<div class="img-wrap fade-section" data-nav data-label="DIRECTOR"><img src="images/4director%20cate.jpg" alt="Director"></div>
+<div class="img-wrap fade-section" data-nav data-label="마이옥션"><img src="images/5ma%20main.jpg" alt="마이옥션 Main"></div>
+<div class="img-wrap fade-section"><img src="images/6ma%20youtube.jpg" alt="마이옥션 YouTube"></div>
+<div class="channel fade-section"><a href="https://www.youtube.com/@myauction_official" target="_blank">마이옥션TV 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/POEzKz_Dp6Y" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/n7oe8HwXLpA" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/NZ0agkvbSeo" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="img-wrap fade-section"><img src="images/7ma%20uiux.jpg" alt="마이옥션 UIUX"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/0VIqWcYyHcI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="http://my-auction.co.kr/" target="_blank">홈페이지 바로가기 : my-auction.co.kr <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section"><img src="images/8ma%20branding.jpg" alt="마이옥션 Branding"></div>
+<div class="img-wrap fade-section" data-nav data-label="체대친구들"><img src="images/9cdf.jpg" alt="체대친구들"></div>
+<div class="img-wrap fade-section"><img src="images/10cdf%20youtube.jpg" alt="체대친구들 YouTube"></div>
+<div class="channel fade-section"><a href="https://www.youtube.com/@cdf_jason" target="_blank">체대친구들 (현 CDF이재선) 유튜브채널 바로가기 <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/OTkMlAkWIpI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QVttLq5q3dWb0lYI29LZvYX" target="_blank">▶ 체터뷰 · Playlist (70 videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/tvw-8xtJ1ME" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QU9sKyzLaSxkVyd6_m4Lwna" target="_blank">▶ 체대파일러 · All Contents (5 Videos) <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/QWNB-H4euhA" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QX5-oW51xByVBf9gVSh9yLZ" target="_blank">▶ 공무원체력 강의 · All Contents <span class="arr">[→]</span></a></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/-N8OhkDXvQM" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QVmtX7Re1gpjN2aQkGV7znv" target="_blank">▶ 꿀팁정보통 · All Contents (13 Videos) <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section"><img src="images/11cdf%20center.jpg" alt="체대친구들 Center"></div>
+<div class="links fade-section"><a href="https://www.youtube.com/watch?v=SYU61ezqz4c" target="_blank">▶ 소방공무원특강 · View Contents <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section" data-nav data-label="배턴터치"><img src="images/12baton.jpg" alt="배턴터치"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Afy54zR10uY" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/jnF_LRvk72M" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Gvo69s7GebU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/WUALzMa3ZZ8" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="img-wrap fade-section" data-nav data-label="에이런컴퍼니"><img src="images/13arun.jpg" alt="에이런컴퍼니"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/dc6tSan5jQQ" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/2XhH3uvKuUU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/02EBC3NK_l8" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QXssEpcK6V-ncxsGfNmdlJy" target="_blank">▶ 에이런컴퍼니 · All contents (30 videos) <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section" data-nav data-label="DESIGNER"><img src="images/14designer%20cate.jpg" alt="Designer"></div>
+<div class="img-wrap fade-section" data-nav data-label="크몽"><img src="images/15kmong.jpg" alt="크몽"></div>
+<div class="links fade-section"><a href="https://kmong.com/@SKIPPWORKS/portfolios" target="_blank">▶ 크몽 · All Artworks (50+) <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section" data-nav data-label="블랙비스트"><img src="images/16vv.jpg" alt="블랙비스트"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/SzODEKvOdvI" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="img-wrap fade-section"><img src="images/17vv%20detail.jpg" alt="블랙비스트 Detail"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/DivNq5wFcRU" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/X4oN7xJiyIs" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Y5H3Emz8vqg" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section"><a href="https://youtube.com/playlist?list=PLxytJQTYF-QU8iakEjnYusd7G4uFPUocX" target="_blank">▶ 블랙비스트 · All Contents (14 videos) <span class="arr">[→]</span></a></div>
+<div class="img-wrap fade-section" data-nav data-label="윌리워스튜디오"><img src="images/18ww.jpg" alt="윌리워스튜디오"></div>
+<div class="img-wrap fade-section"><img src="images/19ww%20detail.jpg" alt="윌리워스튜디오 Detail"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5L5DEMer4Q" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/Dj-i6g6YhP4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/d8LpIM-pRwo" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="links fade-section">
+<a href="https://www.youtube.com/playlist?list=PLxytJQTYF-QVoTTd4ViAW6tm-bMDT-PoL" target="_blank">▶ 윌리워스튜디오 · All Contents (8 videos) <span class="arr">[→]</span></a>
+<a href="https://www.musinsa.com/content/mz/88762" target="_blank">▶ 윌리워스튜디오 · 무신사 룩북 #1 <span class="arr">[→]</span></a>
+<a href="https://www.musinsa.com/content/mz/92648" target="_blank">▶ 윌리워스튜디오 · 무신사 룩북 #2 <span class="arr">[→]</span></a>
+</div>
+<div class="img-wrap fade-section" data-nav data-label="PERFORMER"><img src="images/20performer%20cate.jpg" alt="Performer"></div>
+<div class="img-wrap fade-section" data-nav data-label="클라이맥스/맨오브펑키즈"><img src="images/21clmx%20mofz.jpg" alt="클라이맥스 맨오브펑키즈"></div>
+<div class="img-wrap fade-section" data-nav data-label="RECORDS"><img src="images/22records.jpg" alt="Records"></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/eXhtiYfcMB4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/I173BYAVxNw" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/biVNG4Vn2B4" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/FVBr0hd0d_E" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="yt-wrap fade-section"><div class="yt-container"><iframe src="https://www.youtube.com/embed/M5hJqde6h5Y" allowfullscreen loading="lazy"></iframe></div></div>
+<div class="img-wrap fade-section" data-nav data-label="END"><img src="images/23end.jpg" alt="End"></div>
+
+<footer class="fade-section">
+<div class="footer-system">
+<div class="footer-msg">
+SKIPPWORLD는 계속 확장 중입니다.<br>
+감사합니다.
+</div>
+</div>
+<div class="footer-copy">© 2026 SKIPPWORLD<span style="color:var(--accent)">.</span> All Rights Reserved.</div>
+</footer>
+</div>
+
+<script>
+/* ═══ STARS + SHOOTING STARS ═══ */
+var sc=document.getElementById('starsCanvas'),sx=sc.getContext('2d');
+function resizeCanvas(){sc.width=window.innerWidth;sc.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+
+var stars=[];for(var i=0;i<200;i++)stars.push({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*1.2+0.3,a:Math.random()*0.6+0.2,s:Math.random()*0.002+0.001});
+var shooters=[];
+function spawnShooter(){
+shooters.push({x:Math.random()*sc.width,y:Math.random()*sc.height*0.4,vx:3+Math.random()*4,vy:1+Math.random()*2,life:1,decay:0.01+Math.random()*0.015,len:40+Math.random()*60});
+setTimeout(spawnShooter,2000+Math.random()*6000);
+}
+setTimeout(spawnShooter,1000);
+
+function drawStars(){
+sx.clearRect(0,0,sc.width,sc.height);
+for(var i=0;i<stars.length;i++){
+var s=stars[i];
+var flicker=Math.sin(Date.now()*s.s)*0.3+0.7;
+sx.beginPath();sx.arc(s.x%sc.width,s.y%sc.height,s.r,0,Math.PI*2);
+sx.fillStyle='rgba(240,237,232,'+(s.a*flicker)+')';sx.fill();
+}
+for(var i=shooters.length-1;i>=0;i--){
+var sh=shooters[i];
+sx.beginPath();
+sx.moveTo(sh.x,sh.y);
+sx.lineTo(sh.x-sh.vx*sh.len*0.15,sh.y-sh.vy*sh.len*0.15);
+sx.strokeStyle='rgba(255,106,26,'+sh.life*0.6+')';
+sx.lineWidth=1.5;sx.stroke();
+sx.beginPath();sx.arc(sh.x,sh.y,1.5,0,Math.PI*2);
+sx.fillStyle='rgba(255,255,255,'+sh.life+')';sx.fill();
+sh.x+=sh.vx;sh.y+=sh.vy;sh.life-=sh.decay;
+if(sh.life<=0)shooters.splice(i,1);
+}
+requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ═══ CURSOR ═══ */
+var cw=document.getElementById('cursorWrap'),cm=document.getElementById('cursorMoon'),mx=-100,my=-100,ang=0;
+document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;cw.style.display='block';});
+document.addEventListener('mouseleave',function(){cw.style.display='none';});
+function aCur(){ang+=0.03;cw.style.left=mx+'px';cw.style.top=my+'px';cm.style.left=(Math.cos(ang)*18-7)+'px';cm.style.top=(Math.sin(ang)*18-7)+'px';requestAnimationFrame(aCur);}
+aCur();
+
+/* ═══ LANDING ═══ */
+var phase='typing_welcome';
+var landing=document.getElementById('landing');
+var welcomeWrap=document.getElementById('welcomeWrap');
+var dialogueWrap=document.getElementById('dialogueWrap');
+var dContent=document.getElementById('dContent');
+var dPrompt=document.getElementById('dPrompt');
+var titleText=document.getElementById('titleText');
+var clickEnter=document.getElementById('clickEnter');
+
+/* WELCOME with quotes and orange dot */
+var wText='"Welcome to SKIPPWORLD"';
+var wIdx=0;
+function typeW(){
+if(wIdx<wText.length){
+var display=wText.substring(0,wIdx+1);
+/* Replace the last period-like dot after SKIPPWORLD with orange */
+titleText.innerHTML=display.replace(/SKIPPWORLD/g,'SKIPPWORLD<span class="dot">.</span>').replace('SKIPPWORLD<span class="dot">.</span>"','SKIPPWORLD<span class="dot">.</span>"');
+wIdx++;setTimeout(typeW,80);
+}else{
+titleText.innerHTML='"Welcome to SKIPPWORLD<span class="dot">.</span>"';
+phase='welcome_done';clickEnter.style.display='block';
+}
+}
+setTimeout(typeW,500);
+
+/* CLICK */
+landing.addEventListener('click',function(e){
+if(e.target.closest('a'))return;
+if(phase==='welcome_done'){
+phase='to_dialogue';
+welcomeWrap.style.transition='all 0.5s ease';welcomeWrap.style.opacity='0';welcomeWrap.style.transform='translateY(-30px)';
+setTimeout(function(){
+welcomeWrap.style.display='none';dialogueWrap.style.display='block';dialogueWrap.style.opacity='0';dialogueWrap.style.transform='translateY(15px)';
+dialogueWrap.style.transition='all 0.4s ease';
+setTimeout(function(){dialogueWrap.style.opacity='1';dialogueWrap.style.transform='translateY(0)';setTimeout(startD,300);},50);
+},500);
+}else if(phase==='dialogue_typing'){fastMode=true;}
+else if(phase==='dialogue_done'){enterReveal();}
+});
+
+/* DIALOGUE */
+var fullText='"SKIPPWORLD에 오신 것을 환영합니다."\n\n18년간의 비보이 활동을 바탕으로 쌓아올린\n비디오 디렉터 ・ 디자이너 ・ 퍼포머로서의 활동들을\nSKIPP(김영훈)의 세계관, "SKIPPWORLD"라는\n이름의 세계관을 담아봤습니다.\n\n지금부터ㅡ, "SKIPPWORLD"를 확인해보세요.';
+var dIdx=0,fastMode=false,rendered='';
+function startD(){phase='dialogue_typing';dPrompt.textContent='[ CLICK : 빠르게 넘기기 ]';dIdx=0;rendered='';typeD();}
+function typeD(){
+if(dIdx>=fullText.length){phase='dialogue_done';dPrompt.textContent='[ CLICK TO ENTER SKIPPWORLD. ]';dPrompt.style.color='var(--accent)';dPrompt.style.opacity='0.8';return;}
+var ch=fullText[dIdx];if(ch==='\n')rendered+='<br>';else rendered+=ch;
+dContent.innerHTML=rendered;dIdx++;
+var d=fastMode?6:40;if(ch==='\n')d=fastMode?25:180;if(ch==='.'||ch===','||ch==='"')d=fastMode?12:100;
+setTimeout(typeD,d);
+}
+
+/* ZOOM BLUR TRANSITION */
+function enterReveal(){
+phase='revealing';
+dialogueWrap.style.transition='all 1s cubic-bezier(0.4,0,0.2,1)';
+dialogueWrap.style.transform='scale(2.5)';dialogueWrap.style.filter='blur(25px)';dialogueWrap.style.opacity='0';
+setTimeout(function(){
+landing.style.transition='opacity 0.3s';landing.style.opacity='0';
+setTimeout(function(){landing.style.display='none';startReveal();},300);
+},700);
+}
+
+/* REVEAL MAIN */
+function startReveal(){
+var rp=document.getElementById('revealPhase'),ri=document.getElementById('revealImg'),rm=document.getElementById('revealMask');
+rp.style.display='block';ri.style.opacity='1';ri.style.width='25vw';ri.style.borderRadius='6px';
+rm.style.background='radial-gradient(circle at center,transparent 8%,rgba(0,0,0,0.95) 25%)';
+var sc2=0,mx2=3,prog=0;
+function upMask(p){var r=8+p*55;rm.style.background='radial-gradient(circle at center,transparent '+r+'%,rgba(0,0,0,'+(0.95-p*0.4)+') '+(r+12)+'%)';}
+function onW(e){
+e.preventDefault();
+var delta=e.deltaY;
+if(delta>0){sc2++;prog=Math.min(sc2/mx2,1);
+ri.style.width=(25+prog*75)+'vw';ri.style.borderRadius=(6*(1-prog))+'px';upMask(prog);
+if(prog>=1){window.removeEventListener('wheel',onW);
+ri.style.transition='all 0.5s ease';ri.style.width='100vw';ri.style.borderRadius='0';rm.style.transition='opacity 0.4s';rm.style.opacity='0';
+setTimeout(showMain,600);}
+}}
+window.addEventListener('wheel',onW,{passive:false});
+var ty=0;
+function onTS(e){ty=e.touches[0].clientY;}
+function onTM(e){e.preventDefault();var d=ty-e.touches[0].clientY;if(Math.abs(d)>30){ty=e.touches[0].clientY;sc2++;prog=Math.min(sc2/mx2,1);
+ri.style.width=(25+prog*75)+'vw';ri.style.borderRadius=(6*(1-prog))+'px';upMask(prog);
+if(prog>=1){window.removeEventListener('touchstart',onTS);window.removeEventListener('touchmove',onTM);
+ri.style.transition='all 0.5s ease';ri.style.width='100vw';ri.style.borderRadius='0';rm.style.transition='opacity 0.4s';rm.style.opacity='0';
+setTimeout(showMain,600);}
+}}
+window.addEventListener('touchstart',onTS,{passive:false});window.addEventListener('touchmove',onTM,{passive:false});
+}
+
+function showMain(){
+document.getElementById('revealPhase').style.display='none';
+document.getElementById('mainContent').style.display='block';
+document.body.style.overflow='';
+document.body.style.overflowX='hidden';
+document.body.style.overflowY='auto';
+document.getElementById('vigTop').style.opacity='1';document.getElementById('vigBot').style.opacity='1';
+document.getElementById('scrollNav').style.opacity='1';window.scrollTo(0,0);
+var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
+}
+
+/* SCROLL NAV */
+var nav=document.getElementById('scrollNav'),secs=document.querySelectorAll('[data-nav]');
+for(var i=0;i<secs.length;i++){
+var w=document.createElement('div');w.className='sd-wrap';
+var b=document.createElement('div');b.className='sd-bar';
+var l=document.createElement('div');l.className='sd-label';l.textContent=secs[i].getAttribute('data-label')||'';
+w.appendChild(l);w.appendChild(b);
+(function(idx){w.addEventListener('click',function(){secs[idx].scrollIntoView({behavior:'smooth',block:'start'});});})(i);
+nav.appendChild(w);
+}
+function uNav(){
+var bars=nav.querySelectorAll('.sd-bar'),ai=0;
+for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<window.innerHeight*0.5)ai=i;}
+for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
+}
+window.addEventListener('scroll',uNav,{passive:true});
+</script>
+</body>
+</html>
