@@ -56,7 +56,7 @@ animation:pulse 2s ease-in-out infinite;z-index:10;
 .vig-bot{bottom:0;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);}
 
 /* SCROLL NAV */
-#scrollNav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;z-index:200;opacity:0;transition:opacity .5s;}
+#scrollNav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px;z-index:200;opacity:0;transition:opacity .5s;}
 .sd-wrap{display:flex;align-items:center;justify-content:flex-end;gap:0;position:relative;height:20px;cursor:pointer;}
 .sd-bar{height:2px;border-radius:1px;background:rgba(240,237,232,0.15);transition:all .35s ease;width:14px;flex-shrink:0;}
 .sd-bar.active{background:var(--accent);width:28px;height:3px;box-shadow:0 0 8px rgba(255,106,26,0.3);}
@@ -64,6 +64,18 @@ animation:pulse 2s ease-in-out infinite;z-index:10;
 .sd-wrap:hover .sd-bar.active{background:var(--accent);}
 .sd-label{white-space:nowrap;font-size:9px;letter-spacing:1px;color:var(--accent);background:rgba(0,0,0,0.95);border:1px solid rgba(255,106,26,0.15);padding:3px 10px;border-radius:2px;opacity:0;transform:translateX(5px);transition:all .25s ease;pointer-events:none;margin-right:8px;position:absolute;right:100%;}
 .sd-wrap:hover .sd-label{opacity:1;transform:translateX(0);}
+
+/* SUB CONTAINER - accordion */
+.sd-sub-container{
+overflow:hidden;
+max-height:0;
+transition:max-height 0.4s cubic-bezier(0.25,0.1,0.25,1);
+display:flex;flex-direction:column;gap:2px;
+padding-left:0;
+}
+.sd-sub-container.expanded{
+max-height:500px;
+}
 
 /* IMAGES FULL WIDTH */
 .img-wrap{width:100%;padding:5px 0;position:relative;z-index:1;}
@@ -161,36 +173,64 @@ cursor:pointer;opacity:0.3;transition:all .3s;
 .sd-top:hover{opacity:1;}
 .sd-top svg{width:10px;height:10px;}
 
-/* SUB INDICATORS - small ticks between main nav items */
+/* SUB INDICATORS */
+.sd-sub-wrap{
+display:flex;align-items:center;justify-content:flex-end;
+position:relative;height:14px;cursor:pointer;
+}
 .sd-sub{
 width:6px;height:1px;
 background:rgba(240,237,232,0.1);
 border-radius:0.5px;
 transition:all .3s;
-margin:1px 0;
-align-self:flex-end;
+flex-shrink:0;
 }
 .sd-sub.active{
 background:var(--accent);
 width:12px;
 opacity:0.6;
 }
+.sd-sub-label{
+white-space:nowrap;font-size:8px;letter-spacing:0.5px;
+color:rgba(240,237,232,0.4);
+background:rgba(0,0,0,0.95);border:1px solid rgba(255,106,26,0.08);
+padding:2px 8px;border-radius:2px;
+opacity:0;transform:translateX(5px);
+transition:all .2s ease;pointer-events:none;
+margin-right:6px;position:absolute;right:100%;
+}
+.sd-sub-wrap:hover .sd-sub-label{opacity:1;transform:translateX(0);}
+.sd-sub-wrap:hover .sd-sub{width:12px;background:rgba(240,237,232,0.3);}
 
-/* DIAMOND MARKER - links in navigator */
+/* DIAMOND MARKER - links */
+.sd-diamond-wrap{
+display:flex;align-items:center;justify-content:flex-end;
+position:relative;height:14px;cursor:pointer;
+}
 .sd-diamond{
 width:5px;height:5px;
 background:var(--accent);
 transform:rotate(45deg);
 opacity:0.2;
 transition:all .3s;
-margin:2px 0;
-align-self:flex-end;
+flex-shrink:0;
 margin-right:4px;
 }
 .sd-diamond.active{
 opacity:0.8;
 box-shadow:0 0 6px rgba(255,106,26,0.4);
 }
+.sd-diamond-label{
+white-space:nowrap;font-size:8px;letter-spacing:0.5px;
+color:var(--accent);
+background:rgba(0,0,0,0.95);border:1px solid rgba(255,106,26,0.1);
+padding:2px 8px;border-radius:2px;
+opacity:0;transform:translateX(5px);
+transition:all .2s ease;pointer-events:none;
+margin-right:6px;position:absolute;right:100%;
+}
+.sd-diamond-wrap:hover .sd-diamond-label{opacity:1;transform:translateX(0);}
+.sd-diamond-wrap:hover .sd-diamond{opacity:0.6;}
 
 /* FADE */
 .fade-section{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease;}
@@ -491,14 +531,10 @@ var obs=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isInte
 document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);});
 }
 
-/* SCROLL NAV with sub-indicators, video ticks, diamond link markers */
+/* SCROLL NAV - accordion sub containers */
 var nav=document.getElementById('scrollNav');
 var secs=document.querySelectorAll('[data-nav]');
-var subEls=document.querySelectorAll('[data-sub]');
-var vidEls=document.querySelectorAll('[data-vid]');
-var linkEls=document.querySelectorAll('[data-link]');
 
-/* Collect all trackable elements between two main sections */
 function getItemsBetween(mainEl,nextMainEl){
 var allTrackable=document.querySelectorAll('[data-sub],[data-vid],[data-link]');
 var result=[];
@@ -507,51 +543,100 @@ var el=allTrackable[i];
 if(mainEl.compareDocumentPosition(el)&4){
 if(!nextMainEl||nextMainEl.compareDocumentPosition(el)&2){
 result.push(el);
-}
-}
-}
+}}}
 return result;
 }
 
+function getSubLabel(el){
+if(el.hasAttribute('data-link')){
+var a=el.querySelector('a');
+if(a){
+var t=a.textContent.replace(/\[→\]/g,'').trim();
+if(t.length>20)t=t.substring(0,20)+'…';
+return t;
+}
+return 'LINK';
+}
+if(el.hasAttribute('data-vid'))return 'VIDEO';
+var img=el.querySelector('img');
+if(img){
+var alt=img.getAttribute('alt')||'';
+return alt.replace(/\s*(Main|Detail|YouTube|Center|Branding|UIUX)\s*/gi,function(m){return m.trim();}).trim()||'PAGE';
+}
+return 'PAGE';
+}
+
+var subContainers=[];
 var allNavItems=[];
 
 for(var i=0;i<secs.length;i++){
 var w=document.createElement('div');w.className='sd-wrap';
 var b=document.createElement('div');b.className='sd-bar';
-var l=document.createElement('div');l.className='sd-label';l.textContent=secs[i].getAttribute('data-label')||'';
+var l=document.createElement('div');l.className='sd-label';
+l.textContent=secs[i].getAttribute('data-label')||'';
 w.appendChild(l);w.appendChild(b);
 (function(idx){w.addEventListener('click',function(){secs[idx].scrollIntoView({behavior:'smooth',block:'start'});});})(i);
 nav.appendChild(w);
 
+/* Sub container for this section */
+var sc2=document.createElement('div');
+sc2.className='sd-sub-container';
 var nextMain=i<secs.length-1?secs[i+1]:null;
 var items=getItemsBetween(secs[i],nextMain);
+
 for(var j=0;j<items.length;j++){
 var item=items[j];
-var marker;
+var wrap,marker,label;
+
 if(item.hasAttribute('data-link')){
-marker=document.createElement('div');
-marker.className='sd-diamond';
+wrap=document.createElement('div');wrap.className='sd-diamond-wrap';
+marker=document.createElement('div');marker.className='sd-diamond';
+label=document.createElement('div');label.className='sd-diamond-label';
+label.textContent=getSubLabel(item);
+wrap.appendChild(label);wrap.appendChild(marker);
 }else{
-marker=document.createElement('div');
-marker.className='sd-sub';
-}
-marker._trackEl=item;
-allNavItems.push(marker);
-nav.appendChild(marker);
-}
+wrap=document.createElement('div');wrap.className='sd-sub-wrap';
+marker=document.createElement('div');marker.className='sd-sub';
+label=document.createElement('div');label.className='sd-sub-label';
+label.textContent=getSubLabel(item);
+wrap.appendChild(label);wrap.appendChild(marker);
 }
 
+marker._trackEl=item;
+allNavItems.push(marker);
+(function(el){wrap.addEventListener('click',function(){el.scrollIntoView({behavior:'smooth',block:'start'});});})(item);
+sc2.appendChild(wrap);
+}
+
+sc2._sectionIdx=i;
+subContainers.push(sc2);
+nav.appendChild(sc2);
+}
+
+var lastActiveIdx=-1;
 function uNav(){
 var bars=nav.querySelectorAll('.sd-bar'),ai=0;
 for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<window.innerHeight*0.5)ai=i;}
 for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
 
+/* Accordion: expand active section's sub container, collapse others */
+if(ai!==lastActiveIdx){
+for(var i=0;i<subContainers.length;i++){
+if(subContainers[i]._sectionIdx===ai){
+subContainers[i].classList.add('expanded');
+}else{
+subContainers[i].classList.remove('expanded');
+}
+}
+lastActiveIdx=ai;
+}
+
+/* Update sub/diamond active state */
 for(var i=0;i<allNavItems.length;i++){
 var el=allNavItems[i]._trackEl;
 if(el){
 var r=el.getBoundingClientRect();
-var isActive=r.top<window.innerHeight*0.6&&r.bottom>0;
-allNavItems[i].classList.toggle('active',isActive);
+allNavItems[i].classList.toggle('active',r.top<window.innerHeight*0.6&&r.bottom>0);
 }
 }
 }
