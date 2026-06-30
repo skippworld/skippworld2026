@@ -38,6 +38,31 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 #dTextBox{text-align:center;line-height:2.4;font-size:13px;color:rgba(240,237,232,0.85);min-height:180px;}
 #dCaret{display:inline-block;width:2px;height:1em;background:var(--accent);animation:blink .6s step-end infinite;vertical-align:text-bottom;margin-left:1px;}
 #dPrompt{margin-top:25px;text-align:center;font-size:10px;letter-spacing:2px;color:var(--accent);opacity:0.5;animation:pulse 2s ease-in-out infinite;}
+/* ENTER CTA - bright, obviously clickable */
+#dPrompt.enter-cta{
+margin:30px auto 0;display:block;width:fit-content;
+font-size:12px;font-weight:700;letter-spacing:3px;
+color:#fff4e6;opacity:1;
+padding:11px 26px;
+border:1px solid rgba(255,170,90,0.8);
+border-radius:4px;
+background:linear-gradient(180deg,rgba(255,140,60,0.22),rgba(255,106,26,0.10));
+box-shadow:0 0 14px rgba(255,140,60,0.35),inset 0 0 12px rgba(255,170,90,0.12);
+text-shadow:0 0 8px rgba(255,180,110,0.6);
+cursor:pointer;pointer-events:auto;
+animation:ctaGlow 1.8s ease-in-out infinite;
+transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+}
+#dPrompt.enter-cta:hover{
+transform:translateY(-1px) scale(1.03);
+background:linear-gradient(180deg,rgba(255,160,80,0.35),rgba(255,106,26,0.18));
+box-shadow:0 0 22px rgba(255,150,70,0.6),inset 0 0 14px rgba(255,190,130,0.2);
+color:#fff;
+}
+@keyframes ctaGlow{
+0%,100%{box-shadow:0 0 12px rgba(255,140,60,0.3),inset 0 0 10px rgba(255,170,90,0.1);}
+50%{box-shadow:0 0 22px rgba(255,160,80,0.55),inset 0 0 14px rgba(255,190,130,0.2);}
+}
 
 /* REVEAL */
 #revealPhase{position:fixed;inset:0;z-index:4000;background:transparent;display:none;overflow:hidden;}
@@ -59,11 +84,24 @@ animation:pulse 2s ease-in-out infinite;z-index:10;
 #scrollNav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px;z-index:200;opacity:0;transition:opacity .5s;}
 .sd-wrap{display:flex;align-items:center;justify-content:flex-end;gap:0;position:relative;height:20px;cursor:pointer;}
 .sd-bar{height:2px;border-radius:1px;background:rgba(240,237,232,0.15);transition:all .35s ease;width:14px;flex-shrink:0;}
-.sd-bar.active{background:var(--accent);width:28px;height:3px;box-shadow:0 0 8px rgba(255,106,26,0.3);}
+.sd-bar.active{background:var(--accent);width:24px;height:3px;box-shadow:0 0 8px rgba(255,106,26,0.3);}
 .sd-wrap:hover .sd-bar{width:28px;background:rgba(240,237,232,0.4);}
 .sd-wrap:hover .sd-bar.active{background:var(--accent);}
 .sd-label{white-space:nowrap;font-size:9px;letter-spacing:1px;color:var(--accent);background:rgba(0,0,0,0.95);border:1px solid rgba(255,106,26,0.15);padding:3px 10px;border-radius:2px;opacity:0;transform:translateX(5px);transition:all .25s ease;pointer-events:none;margin-right:8px;position:absolute;right:100%;}
 .sd-wrap:hover .sd-label{opacity:1;transform:translateX(0);}
+
+/* SCROLL NAV - HEADER / COUNTER / CURRENT / LEGEND */
+.sd-nav-top{display:flex;flex-direction:column;align-items:flex-end;margin-bottom:14px;}
+.sd-nav-header{font-size:8px;letter-spacing:3px;color:var(--accent);opacity:0.65;white-space:nowrap;margin-bottom:6px;}
+.sd-counter{font-size:14px;font-weight:700;letter-spacing:1px;color:rgba(240,237,232,0.9);white-space:nowrap;line-height:1;}
+.sd-counter b{color:var(--accent);}
+.sd-counter i{font-style:normal;font-size:9px;font-weight:400;color:rgba(240,237,232,0.35);}
+.sd-now{font-size:9px;letter-spacing:1px;color:var(--accent);opacity:0.85;white-space:nowrap;margin-top:5px;max-width:150px;overflow:hidden;text-overflow:ellipsis;text-align:right;}
+.sd-legend{display:flex;flex-direction:column;align-items:flex-end;gap:5px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,106,26,0.12);}
+.sd-legend-row{display:flex;align-items:center;gap:7px;font-size:8px;letter-spacing:0.5px;color:rgba(240,237,232,0.4);white-space:nowrap;}
+.lg-bar{width:16px;height:2px;border-radius:1px;background:var(--accent);opacity:0.8;}
+.lg-dash{width:7px;height:1px;background:rgba(240,237,232,0.5);}
+.lg-dia{width:5px;height:5px;background:var(--accent);transform:rotate(45deg);opacity:0.7;}
 
 /* SUB CONTAINER - accordion */
 .sd-sub-container{
@@ -244,6 +282,8 @@ margin-right:6px;position:absolute;right:100%;
 #scrollNav{right:8px;}
 .sd-label{display:none;}
 .sd-bar{width:10px;}.sd-bar.active{width:20px;}
+.sd-legend,.sd-now,.sd-nav-header{display:none;}
+.sd-counter{font-size:11px;}.sd-nav-top{margin-bottom:8px;}
 footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 .img-wrap{padding:5px 0;}
 }
@@ -445,11 +485,11 @@ else if(phase==='dialogue_done'){enterReveal();}
 });
 
 /* DIALOGUE */
-var fullText='"SKIPPWORLD에 오신 것을 환영합니다."\n\n18년간의 비보이 활동을 바탕으로 쌓아올린\n비디오 디렉터 ・ 디자이너 ・ 퍼포머로서의 활동들을\nSKIPP(김영훈)의 세계관, "SKIPPWORLD"라는\n이름의 세계관을 담아봤습니다.\n\n지금부터ㅡ, "SKIPPWORLD"를 확인해보세요.';
+var fullText='"SKIPPWORLD에 오신 것을 환영합니다."\n\n18년간의 비보이 활동을 바탕으로 쌓아올린\n비디오 디렉터 ・ 디자이너 ・ 퍼포머로서의 활동들을\nSKIPP(김영훈)의 세계관, "SKIPPWORLD"라는\n이름의 세계관으로 담아봤습니다.\n\n지금부터ㅡ, "SKIPPWORLD"를 확인해보세요.';
 var dIdx=0,fastMode=false,rendered='';
-function startD(){phase='dialogue_typing';dPrompt.textContent='[ CLICK : 빠르게 넘기기 ]';dIdx=0;rendered='';typeD();}
+function startD(){phase='dialogue_typing';dPrompt.classList.remove('enter-cta');dPrompt.textContent='[ CLICK : 빠르게 넘기기 ]';dIdx=0;rendered='';typeD();}
 function typeD(){
-if(dIdx>=fullText.length){phase='dialogue_done';dPrompt.textContent='[ CLICK TO ENTER SKIPPWORLD. ]';dPrompt.style.color='var(--accent)';dPrompt.style.opacity='0.8';return;}
+if(dIdx>=fullText.length){phase='dialogue_done';dPrompt.textContent='[ CLICK TO ENTER SKIPPWORLD. ]';dPrompt.classList.add('enter-cta');return;}
 var ch=fullText[dIdx];if(ch==='\n')rendered+='<br>';else rendered+=ch;
 dContent.innerHTML=rendered;dIdx++;
 var d=fastMode?6:40;if(ch==='\n')d=fastMode?25:180;if(ch==='.'||ch===','||ch==='"')d=fastMode?12:100;
@@ -569,6 +609,13 @@ return 'PAGE';
 var subContainers=[];
 var allNavItems=[];
 
+/* nav top: header + counter + current section name */
+var navTop=document.createElement('div');navTop.className='sd-nav-top';
+navTop.innerHTML='<div class="sd-nav-header">[ INDEX ]</div>'+
+'<div class="sd-counter"><b id="navCur">01</b> <i>/ '+('0'+secs.length).slice(-2)+'</i></div>'+
+'<div class="sd-now" id="navNow"></div>';
+nav.appendChild(navTop);
+
 for(var i=0;i<secs.length;i++){
 var w=document.createElement('div');w.className='sd-wrap';
 var b=document.createElement('div');b.className='sd-bar';
@@ -619,6 +666,12 @@ var bars=nav.querySelectorAll('.sd-bar'),ai=0;
 for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<window.innerHeight*0.5)ai=i;}
 for(var i=0;i<bars.length;i++)bars[i].classList.toggle('active',i===ai);
 
+/* update counter + current section name */
+var curEl=document.getElementById('navCur');
+if(curEl)curEl.textContent=('0'+(ai+1)).slice(-2);
+var nowEl=document.getElementById('navNow');
+if(nowEl)nowEl.textContent=secs[ai].getAttribute('data-label')||'';
+
 /* Accordion: expand active section's sub container, collapse others */
 if(ai!==lastActiveIdx){
 for(var i=0;i<subContainers.length;i++){
@@ -641,6 +694,14 @@ allNavItems[i].classList.toggle('active',r.top<window.innerHeight*0.6&&r.bottom>
 }
 }
 window.addEventListener('scroll',uNav,{passive:true});
+
+/* LEGEND - explains marker meanings */
+var legend=document.createElement('div');legend.className='sd-legend';
+legend.innerHTML=
+'<div class="sd-legend-row"><span>섹션</span><span class="lg-bar"></span></div>'+
+'<div class="sd-legend-row"><span>영상·상세</span><span class="lg-dash"></span></div>'+
+'<div class="sd-legend-row"><span>외부 링크</span><span class="lg-dia"></span></div>';
+nav.appendChild(legend);
 
 /* TOP BUTTON */
 var topWrap=document.createElement('div');topWrap.className='sd-top';
