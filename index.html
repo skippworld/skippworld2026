@@ -76,6 +76,12 @@ animation:pulse 2s ease-in-out infinite;z-index:10;
 
 /* MAIN */
 #mainContent{position:relative;z-index:1;display:none;}
+
+/* SCROLL HINT - 페이드인 후 등장, 첫 스크롤 시 사라짐 */
+#scrollHint{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:300;text-align:center;font-size:10px;letter-spacing:3px;color:var(--accent);opacity:0;transition:opacity .6s ease;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.95);}
+#scrollHint.show{opacity:0.7;}
+#scrollHint .chev{display:block;margin-top:5px;font-size:13px;animation:hintBob 1.5s ease-in-out infinite;}
+@keyframes hintBob{0%,100%{transform:translateY(0);opacity:0.5;}50%{transform:translateY(5px);opacity:1;}}
 .vig-top,.vig-bot{position:fixed;left:0;right:0;height:140px;pointer-events:none;z-index:100;opacity:0;transition:opacity .5s;}
 .vig-top{top:0;background:linear-gradient(to bottom,rgba(0,0,0,0.85),transparent);}
 .vig-bot{bottom:0;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);}
@@ -393,6 +399,9 @@ footer{padding:150px 20px 40px;}.footer-system{padding:20px 25px;}
 <div style="height:120vh;position:relative;z-index:1;"></div>
 </div>
 
+<!-- SCROLL HINT -->
+<div id="scrollHint">[ SCROLL ]<span class="chev">↓</span></div>
+
 <!-- ENDING OVERLAY - like landing but reversed -->
 <div id="endOverlay">
 <div id="logoutBox">
@@ -503,15 +512,15 @@ var d=fastMode?6:40;if(ch==='\n')d=fastMode?25:180;if(ch==='.'||ch===','||ch==='
 setTimeout(typeD,d);
 }
 
-/* ZOOM BLUR TRANSITION */
+/* DIALOGUE OUT → MAIN FADE-IN (reveal 줌 효과 제거) */
 function enterReveal(){
 phase='revealing';
-dialogueWrap.style.transition='all 1s cubic-bezier(0.4,0,0.2,1)';
-dialogueWrap.style.transform='scale(2.5)';dialogueWrap.style.filter='blur(25px)';dialogueWrap.style.opacity='0';
+dialogueWrap.style.transition='all 0.9s cubic-bezier(0.4,0,0.2,1)';
+dialogueWrap.style.transform='scale(1.6)';dialogueWrap.style.filter='blur(18px)';dialogueWrap.style.opacity='0';
 setTimeout(function(){
-landing.style.transition='opacity 0.3s';landing.style.opacity='0';
-setTimeout(function(){landing.style.display='none';startReveal();},300);
-},700);
+landing.style.transition='opacity 0.4s';landing.style.opacity='0';
+setTimeout(function(){landing.style.display='none';showMainSeamless();},400);
+},550);
 }
 
 /* REVEAL MAIN - bidirectional scroll, seamless transition */
@@ -564,7 +573,10 @@ window.addEventListener('touchmove',onTM,{passive:false});
 }
 
 function showMainSeamless(){
-document.getElementById('mainContent').style.display='block';
+var mc=document.getElementById('mainContent');
+mc.style.display='block';
+mc.style.opacity='0';
+mc.style.transition='opacity 1.1s ease';
 document.body.style.overflow='';
 document.body.style.overflowX='hidden';
 document.body.style.overflowY='auto';
@@ -579,6 +591,14 @@ document.querySelectorAll('.fade-section').forEach(function(el){obs.observe(el);
 unifyButtons();
 setTimeout(unifyButtons,250);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(unifyButtons);}
+/* fade in (opacity 0 → 100) */
+requestAnimationFrame(function(){requestAnimationFrame(function(){mc.style.opacity='1';});});
+/* scroll hint */
+var hint=document.getElementById('scrollHint');
+if(hint){
+setTimeout(function(){hint.classList.add('show');},900);
+window.addEventListener('scroll',function(){hint.classList.remove('show');},{passive:true,once:true});
+}
 }
 
 /* ═══ UNIFY BUTTON WIDTHS - all buttons match the longest one ═══ */
